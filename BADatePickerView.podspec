@@ -8,6 +8,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/b-allard/BADatePickerView.git", :branch => "master" }
   s.platform     = :ios, '8.0'
   s.frameworks   = 'UIKit', 'CoreGraphics'
-  s.source_files = 'BADatePickerView', 'BADatePickerView/**/*.{h,m}'
+  s.source_files = 'BADatePickerView.{h,m}'
   s.requires_arc = true
 end
