@@ -3,9 +3,11 @@
 //  BADatePickerView
 //
 //  Created by ALLARD Benjamin on 16/08/16.
+//  Copyright © 2016 CGI. All rights reserved.
 //
 
 #import "BADatePickerView.h"
+
 
 @implementation BADatePickerView
 {
@@ -33,6 +35,7 @@
     
     //determine which format is used by the region, and set the correct order for the pickerview columns
     NSMutableArray * dateStringFormat;
+    NSMutableDictionary * monthNumber;
     
     
 }
@@ -58,6 +61,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         years = [[NSMutableArray alloc]init];
         
         dateStringFormat = [[NSMutableArray alloc]init];
+        monthNumber = [[NSMutableDictionary alloc] init];
         
         //setAttributes of PickerView
         [self setShowsSelectionIndicator:YES];
@@ -86,6 +90,12 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     for (int i=0; i<3&&i<[array count]; i++) {
         NSString * string =[[NSString alloc]initWithString:[array[i] substringToIndex:1]];
         [dateStringFormat addObject:string];
+    }
+    
+    
+    for (int i=0;i<[[df monthSymbols]count];i++)
+    {
+        [monthNumber setValue:[NSNumber numberWithInt:i+1] forKey:[df monthSymbols][i] ];
     }
 }
 
@@ -191,7 +201,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
     //init months
     [self initializeMonthsPossibilities];
-    [self removePreviousMonth];
+    [self removePreviousMonth:NO];
     
     //init years
     [self initYearsPossibilities];
@@ -228,7 +238,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     //settings month for periodicity
     monthPossibilities = [months copy];
     //prepare pickerview of month : delete previous month
-    [self removePreviousAndCurrentMonth];
+    [self removePreviousMonth:YES];
     
     
     //init years
@@ -328,11 +338,11 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         monthChanged = YES;
         if(self.periodicity==0)
         {
-            [self removePreviousMonth];
+            [self removePreviousMonth:NO];
         }
         else
         {
-            [self removePreviousAndCurrentMonth];
+            [self removePreviousMonth:YES];
         }
     }
     else
@@ -504,24 +514,11 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 
 -(NSString *)getFebruaryMonthString
 {
-    return monthPossibilities [1];
+    return [dateFormatter monthSymbols][1];
 }
 -(NSInteger)getMonthNumberFromMonthString:(NSString *) monthString
 {
-    NSInteger monthNumber = -1;
-    NSArray * monthSymbols = [dateFormatter monthSymbols];
-    long i=0;
-    while (i<[monthSymbols count] && monthNumber==-1) {
-        
-        if([monthSymbols[i] isEqualToString:monthString])
-        {
-            monthNumber = i+1;
-        }
-        
-        i++;
-    }
-    
-    return monthNumber;
+    return [[monthNumber objectForKey:monthString] integerValue];
 }
 
 
@@ -574,58 +571,33 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
 }
 
--(void)removePreviousMonth
+-(void)removePreviousMonth:(BOOL)alsoCurrentMonth
 {
-    NSDateFormatter *df = [[NSDateFormatter alloc] init];
     BOOL monthFound=NO;
     
-    int i=0;
     //determine current month and compare with
-    
-    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[NSDate date]];
+    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:self.startDate];
     NSInteger currentMonth = [components month];
-    currentMonth-=1;
-    NSString * currentMonthString = [df monthSymbols][currentMonth];
     
-    while(!monthFound && i<[[df monthSymbols]count])
-    {
-        if([months[i] isEqualToString:currentMonthString])
+    int i = 0;
+    while (!monthFound && i<[months count]) {
+        if([self getMonthNumberFromMonthString:months[i]]<=currentMonth)
         {
-            monthFound = YES;
+            if([self getMonthNumberFromMonthString:months[i]]==currentMonth)
+            {
+                monthFound=YES;
+                if(alsoCurrentMonth)
+                {
+                    [months removeObjectAtIndex:i];
+                }
+            }
+            else{
+                [months removeObjectAtIndex:i];
+            }
         }
-        else{
-            
-            [months removeObjectAtIndex:i];
-        }
-        
     }
     
-}
 
--(void)removePreviousAndCurrentMonth
-{
-    NSDateFormatter *df = [[NSDateFormatter alloc] init];
-    BOOL monthFound=NO;
-    
-    int i=0;
-    //determine current month and compare with
-    
-    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[NSDate date]];
-    NSInteger currentMonth = [components month];
-    currentMonth-=1;
-    NSString * currentMonthString = [df monthSymbols][currentMonth];
-    
-    while(i<[months count]&&!monthFound && i<[[df monthSymbols]count])
-    {
-        if([months[i] isEqualToString:currentMonthString])
-        {
-            monthFound = YES;
-        }
-        
-        [months removeObjectAtIndex:i];
-        
-    }
-    
 }
 
 #pragma mark - setters / getters
