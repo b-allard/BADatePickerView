@@ -404,8 +404,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     [currentDateComponents setYear:currentYear];
     currentDateSelected = [[NSCalendar currentCalendar] dateFromComponents:currentDateComponents];
     
-    if ( [[self baDatePickerViewDelegate] respondsToSelector:@selector(dateValueChanged:)] ) {
-        [[self baDatePickerViewDelegate] dateValueChanged:currentDateSelected];
+    if ( [[self baDatePickerViewDelegate] respondsToSelector:@selector(pickerView:dateValueChanged:)] ) {
+        [[self baDatePickerViewDelegate] pickerView:pickerView dateValueChanged:currentDateSelected];
     }
     
 }
