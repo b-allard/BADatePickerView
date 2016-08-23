@@ -11,7 +11,7 @@
 
 @protocol BADatePickerViewDelegate <NSObject>
 @optional
-- (void) dateValueChanged:(NSDate *)newDate;
+- (void) pickerView:(UIPickerView *)pickerView dateValueChanged:(NSDate *)newDate;
 @end
 
 @interface BADatePickerView : UIPickerView <UIPickerViewDataSource, UIPickerViewDelegate>
