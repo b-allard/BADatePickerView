@@ -397,6 +397,10 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         }
         
     }
+    else
+    {
+        dayChanged = YES;
+    }
     
     //reload component changed
     if(dayChanged)
@@ -580,24 +584,22 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     NSInteger currentMonth = [components month];
     
     int i = 0;
-    while (!monthFound && i<[months count]) {
-        if([self getMonthNumberFromMonthString:months[i]]<=currentMonth)
+    while (!monthFound && i<[months count]&&[self getMonthNumberFromMonthString:months[i]]<=currentMonth) {
+        if([self getMonthNumberFromMonthString:months[i]]==currentMonth)
         {
-            if([self getMonthNumberFromMonthString:months[i]]==currentMonth)
+            monthFound=YES;
+            if(alsoCurrentMonth)
             {
-                monthFound=YES;
-                if(alsoCurrentMonth)
-                {
-                    [months removeObjectAtIndex:i];
-                }
-            }
-            else{
                 [months removeObjectAtIndex:i];
             }
         }
+        else{
+            [months removeObjectAtIndex:i];
+        }
+        
     }
     
-
+    
 }
 
 #pragma mark - setters / getters
