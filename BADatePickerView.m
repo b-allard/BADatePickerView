@@ -3,11 +3,9 @@
 //  BADatePickerView
 //
 //  Created by ALLARD Benjamin on 16/08/16.
-//  Copyright © 2016 CGI. All rights reserved.
 //
 
 #import "BADatePickerView.h"
-
 
 @implementation BADatePickerView
 {
@@ -263,6 +261,37 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     return label;
 }
 
+//determine the width of the component for the pickerview
+- (CGFloat)pickerView:(UIPickerView *)pickerView widthForComponent:(NSInteger)component
+{
+    CGFloat componentWidth = 0;
+    CGFloat pickerViewSizeWidth = pickerView.frame.size.width;
+    
+    if(component==indexOfDays)
+    {
+        //days = 1/4
+        componentWidth = pickerViewSizeWidth/12*3;
+    }
+    else
+    {
+        if(component==indexOfMonths)
+        {
+            //months = 1/4-1/3 = 5/12
+            componentWidth = pickerViewSizeWidth/12*5;
+        }
+        else
+        {
+            if(component==indexOfYears)
+            {
+                //year = 1/3
+                componentWidth = pickerViewSizeWidth/12*4;
+            }
+        }
+    }
+    return componentWidth;
+    
+}
+
 // Make action when a specific row is selected
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
@@ -320,7 +349,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
     
     isThisMonthSelected =[months[[self selectedRowInComponent:indexOfMonths]] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
-
+    
     currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
     currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     currentYear = [years[[self selectedRowInComponent:indexOfYears]] integerValue];
@@ -367,7 +396,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     }
     
     currentDaySelected = [days[[self selectedRowInComponent:indexOfDays]] integerValue];
-
+    
     //create date from each row selected inside the differents components
     currentDateComponents = [[NSDateComponents alloc] init];
     [currentDateComponents setDay:currentDaySelected];
@@ -375,8 +404,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     [currentDateComponents setYear:currentYear];
     currentDateSelected = [[NSCalendar currentCalendar] dateFromComponents:currentDateComponents];
     
-    if ( [[self baDatePickerViewDelegate] respondsToSelector:@selector(dateValueChange:)] ) {
-        [[self baDatePickerViewDelegate] dateValueChange:currentDateSelected];
+    if ( [[self baDatePickerViewDelegate] respondsToSelector:@selector(dateValueChanged:)] ) {
+        [[self baDatePickerViewDelegate] dateValueChanged:currentDateSelected];
     }
     
 }
