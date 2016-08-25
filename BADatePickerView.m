@@ -3,7 +3,6 @@
 //  BADatePickerView
 //
 //  Created by ALLARD Benjamin on 16/08/16.
-//  Copyright © 2016 CGI. All rights reserved.
 //
 
 #import "BADatePickerView.h"
@@ -173,6 +172,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     NSDateComponents *addComponents = [[NSDateComponents alloc] init];
     dateFormatter.dateFormat = @"yyyy";
     
+    [years removeAllObjects];
+    
     for (int nbYears = 0;nbYears < [self numberOfYearFromNow];nbYears++)
     {
         addComponents.year = nbYears;
@@ -235,14 +236,17 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     //init months
     [self initializeMonthsPossibilities];
     [self removeUnrelevantMonthWithPeriodicity];
-    //settings month for periodicity
-    monthPossibilities = [months copy];
     //prepare pickerview of month : delete previous month
     [self removePreviousMonth:YES];
     
     
     //init years
     [self initYearsPossibilities];
+    if([months count]==0)
+    {
+        [self selectNextYear];
+        months = [NSMutableArray arrayWithArray:monthPossibilities];
+    }
 }
 
 
@@ -316,19 +320,18 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
      *      - I remove choice after the 28
      */
     
-    thisYearSelected = [years[[self selectedRowInComponent:indexOfYears]] integerValue]==[startDateComponents year];
-    BOOL isThisMonthSelected =[months[[self selectedRowInComponent:indexOfMonths]] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
-    
     BOOL dayChanged = NO;
     BOOL monthChanged = NO;
+    BOOL yearChanged = NO;
     BOOL nextMonth = NO;
     
+    BOOL isThisMonthSelected =[months[[self selectedRowInComponent:indexOfMonths]] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
+    thisYearSelected = [years[[self selectedRowInComponent:indexOfYears]] integerValue]==[startDateComponents year];
     
     NSInteger currentDaySelected = [days[[self selectedRowInComponent:indexOfDays]] integerValue];
-    NSString * currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
-    NSInteger currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     NSInteger currentYear = [years[[self selectedRowInComponent:indexOfYears]] integerValue];
-    
+    NSString * currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
+    NSInteger  currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     
     //manage day only if no periodicity
     
@@ -357,12 +360,16 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         [self selectThisMonth:currentMonthSelectedString];
     }
     
+    if(yearChanged)
+    {
+        [self selectThisYear:currentYear];
+    }
+    
     
     isThisMonthSelected =[months[[self selectedRowInComponent:indexOfMonths]] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
     
     currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
     currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
-    currentYear = [years[[self selectedRowInComponent:indexOfYears]] integerValue];
     
     
     if(self.periodicity==0)
@@ -427,6 +434,47 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 
 
 #pragma mark - utils for delegate
+-(void)selectNextYear
+{
+    if([years count]!=0 && [years count]>[self selectedRowInComponent:indexOfYears])
+    {
+        //NSInteger nextYear = years[1];
+        BOOL yearFound = NO;
+        int i=0;
+        NSInteger nextYear = [years[i+1] integerValue];
+        
+        while(!yearFound && i< [years count] && [years[i] integerValue] <= nextYear)
+        {
+            if([years[i] integerValue] == nextYear)
+            {
+                [self selectRow:i inComponent:indexOfYears animated:NO];
+                yearFound = YES;
+            }
+            i++;
+        }
+        
+    }
+}
+
+-(void)selectThisYear:(NSInteger)thisYear
+{
+    BOOL yearFound = NO;
+    int i=0;
+    while(i< [years count] && [years[i] integerValue] <= thisYear)
+    {
+        if([years[i] integerValue] == thisYear)
+        {
+            [self selectRow:i inComponent:indexOfYears animated:NO];
+            yearFound = YES;
+        }
+        i++;
+    }
+    if(!yearFound)
+    {
+        [self selectRow:0 inComponent:indexOfYears animated:NO];
+    }
+}
+
 -(void)selectThisMonth:(NSString *)thisMonth
 {
     BOOL monthFound = NO;
@@ -531,47 +579,36 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
  */
 -(void)removeUnrelevantMonthWithPeriodicity
 {
-    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[NSDate date]];
+    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:self.startDate];
     
     if(self.periodicity != 0)
     {
         NSInteger currentMonth = [components month];
         long i = currentMonth;
+        //what to do when month = 12 ?
         NSInteger monthInFunctionOfPeriodicity = currentMonth+1;
         
         while(monthInFunctionOfPeriodicity!= currentMonth+12)
         {
-            if(monthInFunctionOfPeriodicity<=12)
-            {
-                if(((monthInFunctionOfPeriodicity - currentMonth) % self.periodicity)!=0)
-                {
-                    [months removeObjectAtIndex:i];
-                }
-                else
-                {
-                    i++;
-                }
-            }
-            else
-            {
-                if(((monthInFunctionOfPeriodicity - currentMonth) % self.periodicity)!=0)
-                {
-                    [months removeObjectAtIndex:i];
-                }
-                else
-                {
-                    i++;
-                }
-            }
-            
             if(i>=[months count])
             {
                 i=0;
+            }
+
+            if(((monthInFunctionOfPeriodicity - currentMonth) % self.periodicity)!=0)
+            {
+                [months removeObjectAtIndex:i];
+            }
+            else
+            {
+                i++;
             }
             
             monthInFunctionOfPeriodicity ++;
         }
     }
+    
+    monthPossibilities = [months copy];
     
 }
 
