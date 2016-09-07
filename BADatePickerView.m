@@ -161,6 +161,47 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     monthPossibilities = [months copy];
 }
 
+-(void)initializeMonthsPossibilitiesFrom:(NSDate *)startedDate untilFinishDate:(NSDate*)finishDate
+{
+    months = [[NSMutableArray alloc] init];
+    NSDateComponents * startedDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:startedDate];
+    
+    NSDateComponents * finishDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:finishDate];
+    
+    for (int i  =[startedDateComps month]; i<[finishDateComps month]; i++)
+    {
+        if(i>12)
+        {
+            i=0;
+        }
+        [months addObject:[[dateFormatter monthSymbols]objectAtIndex: i]];
+    }
+    monthPossibilities = [months copy];
+}
+
+/**
+ * Initialiase the years possibilities in a array
+ */
+- (void)initYearsPossibilitiesFrom:(NSDate *)startedDate untilFinishDate:(NSDate*)finishDate
+
+{
+    NSDateComponents * startedDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:startedDate];
+    
+    NSDateComponents * finishDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:finishDate];
+
+    
+    NSDateComponents *addComponents = [[NSDateComponents alloc] init];
+    dateFormatter.dateFormat = @"yyyy";
+    
+    [years removeAllObjects];
+    
+    for (int nbYears = 0;nbYears+[startedDateComps year] <= [finishDateComps year];nbYears++)
+    {
+        addComponents.year = nbYears;
+        [years addObject:[dateFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingComponents:addComponents toDate:startedDate options:0]]];
+    }
+}
+
 
 /**
  * Initialiase the years possibilities in a array
@@ -180,6 +221,31 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         [years addObject:[dateFormatter stringFromDate:[calendar dateByAddingComponents:addComponents toDate:self.startDate options:0]]];
     }
 }
+
+-(void)initializefromStartedDate:(NSDate *) startedDate toFinishDate:(NSDate *)finishDate
+{
+    //settings params
+    if(!startedDate)
+    {
+        self.startDate = [NSDate date];
+    }
+    else{
+        self.startDate = startedDate;
+    }
+    //initialize date format
+    [self initDateFormat];
+    [self setIndex];
+    
+    //init days
+    [self initializeDaysPossibilities];
+    
+    //init months
+    [self initializeMonthsPossibilitiesFrom:self.startDate untilFinishDate:finishDate];
+
+    //init years
+    [self initYearsPossibilitiesFrom:self.startDate untilFinishDate:finishDate];
+}
+
 
 -(void)initializeWithNumberOfYears:(NSInteger)numberOfYears startedDate:(NSDate *) startedDate
 {
