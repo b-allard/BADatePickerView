@@ -21,6 +21,11 @@
 @property (nonatomic) NSDate * startDate;
 @property (nonatomic, assign) id<BADatePickerViewDelegate> baDatePickerViewDelegate;
 
+/**
+ *  Initialize picker view
+ */
+-(void)initializefromStartedDate:(NSDate *) startedDate toFinishDate:(NSDate *)finishDate;
+
 
 /**
  *  Initialize picker view
