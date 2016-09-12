@@ -274,6 +274,9 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
     //init years
     [self initYearsPossibilitiesFrom:self.startDate untilFinishDate:finishDate];
+    
+    //if previous instances of BADatePickerView - reset the component
+    [self reloadAllComponents];
 }
 
 
