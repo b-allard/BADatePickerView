@@ -26,11 +26,13 @@
     
     //date tools
     NSDateComponents *startDateComponents;
+    NSDateComponents *finishDateComponents;
     NSDateComponents *currentDateComponents;
     NSDateFormatter *dateFormatter ;
     BOOL thisYearSelected;
     
     NSDate * currentDateSelected;
+    NSDate * finishDate;
     
     //determine which format is used by the region, and set the correct order for the pickerview columns
     NSMutableArray * dateStringFormat;
@@ -116,6 +118,18 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     }
 }
 
+-(void)removeDaysAfterFinishDate
+{
+    NSInteger finishDay = [finishDateComponents day];
+    long i=[days count]-1;
+    while (i>=0 && [days[i] integerValue]>finishDay)
+    {
+        [days removeObjectAtIndex:i];
+        i--;
+    }
+
+}
+
 /**
  *  Delete days before the started date
  */
@@ -161,21 +175,35 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     monthPossibilities = [months copy];
 }
 
--(void)initializeMonthsPossibilitiesFrom:(NSDate *)startedDate untilFinishDate:(NSDate*)finishDate
+-(void)initializeMonthsPossibilitiesFrom:(NSDate *)startedDate untilFinishDate:(NSDate*)finishedDate forYears:(NSInteger)year
 {
     months = [[NSMutableArray alloc] init];
-    NSDateComponents * startedDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:startedDate];
+    NSInteger month =1;
+    NSInteger numberOfMonth = 0;
     
-    NSDateComponents * finishDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:finishDate];
-    
-    for (int i  =[startedDateComps month]; i<[finishDateComps month]; i++)
+    if([startDateComponents year]==year)
     {
-        if(i>12)
-        {
-            i=0;
-        }
-        [months addObject:[[dateFormatter monthSymbols]objectAtIndex: i]];
+        numberOfMonth = [[[NSCalendar currentCalendar] components: NSCalendarUnitMonth
+                                                                   fromDate: startedDate
+                                                                     toDate: finishedDate
+                                                                    options: 0] month];
+        numberOfMonth+=1;
+        month =[startDateComponents month];
+        
     }
+    else{
+        if([startDateComponents year]+1==year)
+        {
+            numberOfMonth = [finishDateComponents month]-1;
+        }
+    }
+    for (long i=0; i<=numberOfMonth && month<=12; i++)
+    {
+        [months addObject:[[dateFormatter monthSymbols]objectAtIndex: month-1]];
+        month++;
+    }
+    
+    
     monthPossibilities = [months copy];
 }
 
@@ -187,15 +215,13 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 {
     NSDateComponents * startedDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:startedDate];
     
-    NSDateComponents * finishDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:finishDate];
-
     
     NSDateComponents *addComponents = [[NSDateComponents alloc] init];
     dateFormatter.dateFormat = @"yyyy";
     
     [years removeAllObjects];
     
-    for (int nbYears = 0;nbYears+[startedDateComps year] <= [finishDateComps year];nbYears++)
+    for (int nbYears = 0;nbYears+[startedDateComps year] <= [finishDateComponents year];nbYears++)
     {
         addComponents.year = nbYears;
         [years addObject:[dateFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingComponents:addComponents toDate:startedDate options:0]]];
@@ -222,7 +248,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     }
 }
 
--(void)initializefromStartedDate:(NSDate *) startedDate toFinishDate:(NSDate *)finishDate
+-(void)initializefromStartedDate:(NSDate *) startedDate toFinishDate:(NSDate *)finish
 {
     //settings params
     if(!startedDate)
@@ -232,6 +258,10 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     else{
         self.startDate = startedDate;
     }
+    finishDate = finish;
+    
+    finishDateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:finishDate];
+    
     //initialize date format
     [self initDateFormat];
     [self setIndex];
@@ -240,8 +270,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     [self initializeDaysPossibilities];
     
     //init months
-    [self initializeMonthsPossibilitiesFrom:self.startDate untilFinishDate:finishDate];
-
+    [self initializeMonthsPossibilitiesFrom:self.startDate untilFinishDate:finishDate forYears:[startDateComponents year]];
+    
     //init years
     [self initYearsPossibilitiesFrom:self.startDate untilFinishDate:finishDate];
 }
@@ -417,7 +447,15 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     else
     {
         monthChanged = YES;
-        months = [NSMutableArray arrayWithArray:monthPossibilities];
+        
+        if(finishDate)
+        {
+            [self initializeMonthsPossibilitiesFrom:self.startDate untilFinishDate:finishDate forYears:currentYear];
+        }
+        else
+        {
+            months = [NSMutableArray arrayWithArray:monthPossibilities];
+        }
     }
     
     if(monthChanged)
@@ -437,7 +475,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
     currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     
-    
+    //if i haven't periodicity
     if(self.periodicity==0)
     {
         dayChanged = YES;
@@ -467,6 +505,15 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         {
             dayChanged = YES;
             [self removeDaysBeforeStartedDate];
+        }
+        else
+        {
+            //if I'm in the same month and the same year of the finish date, remove all days after finish date
+            if(currentMonth==[finishDateComponents month] && currentYear==[finishDateComponents year])
+            {
+                dayChanged = YES;
+                [self removeDaysAfterFinishDate];
+            }
         }
         
     }
@@ -660,7 +707,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
             {
                 i=0;
             }
-
+            
             if(((monthInFunctionOfPeriodicity - currentMonth) % self.periodicity)!=0)
             {
                 [months removeObjectAtIndex:i];
