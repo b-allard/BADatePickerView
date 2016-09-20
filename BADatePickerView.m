@@ -82,6 +82,10 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
     //spare all date elements
     NSArray * array = [[df dateFormat] componentsSeparatedByString:@"/"];
+    if([array count] <=1)
+    {
+        array = [[df dateFormat] componentsSeparatedByString:@"."];
+    }
     
     dateStringFormat = [[NSMutableArray alloc]init];
     
@@ -594,7 +598,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
             {
                 i=0;
             }
-
+            
             if(((monthInFunctionOfPeriodicity - currentMonth) % self.periodicity)!=0)
             {
                 [months removeObjectAtIndex:i];
