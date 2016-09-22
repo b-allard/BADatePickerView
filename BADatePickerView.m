@@ -389,6 +389,13 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
                 //if we are before teh 26, we deleted previous day and last possibly due date
                 //todo make it generic and remove days after 28 or 29, not only the last choice
                 [days removeLastObject];
+                if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
+                {
+                    [days addObject:[[NSNumber alloc] initWithInt:28]];
+                }
+                else{
+                    [days addObject:[[NSNumber alloc] initWithInt:29]];
+                }
             }
             else
             {
@@ -641,6 +648,20 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     }
     
     
+}
+
+-(BOOL)dateIsLeapYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day
+{
+    NSDateComponents *currentDateComps = [[NSDateComponents alloc] init];
+    [currentDateComps setDay:day];
+    [currentDateComps setMonth:month-1];
+    [currentDateComps setYear:year];
+   /* NSDate * currentDate = [[NSCalendar currentCalendar] dateFromComponents:currentDateComps] ;
+    currentDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:currentDate];*/
+
+    
+    
+    return [currentDateComps isLeapMonth];
 }
 
 #pragma mark - setters / getters
