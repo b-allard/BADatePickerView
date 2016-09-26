@@ -376,25 +376,6 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     
     
-    //if selected month is february
-    if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
-    {
-        [days removeLastObject];
-        if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
-        {
-            [days addObject:[[NSNumber alloc] initWithInt:28]];
-        }
-        else{
-            [days addObject:[[NSNumber alloc] initWithInt:29]];
-        }
-        dayChanged = YES;
-    }
-    else{
-        [days removeLastObject];
-        [days addObject:[[NSNumber alloc] initWithInt:30]];
-    }
-
-    
     
     if(self.periodicity==0)
     {
@@ -414,6 +395,27 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     {
         dayChanged = YES;
     }
+    
+    
+    //if selected month is february
+    if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
+    {
+        [days removeLastObject];
+        if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
+        {
+            [days addObject:[[NSNumber alloc] initWithInt:28]];
+        }
+        else{
+            [days addObject:[[NSNumber alloc] initWithInt:29]];
+        }
+        dayChanged = YES;
+    }
+    else{
+        [days removeLastObject];
+        [days addObject:[[NSNumber alloc] initWithInt:30]];
+        dayChanged = YES;
+    }
+
     
     //reload component changed
     if(dayChanged)
