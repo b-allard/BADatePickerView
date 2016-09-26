@@ -26,13 +26,11 @@
     
     //date tools
     NSDateComponents *startDateComponents;
-    NSDateComponents *finishDateComponents;
     NSDateComponents *currentDateComponents;
     NSDateFormatter *dateFormatter ;
     BOOL thisYearSelected;
     
     NSDate * currentDateSelected;
-    NSDate * finishDate;
     
     //determine which format is used by the region, and set the correct order for the pickerview columns
     NSMutableArray * dateStringFormat;
@@ -122,18 +120,6 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     }
 }
 
--(void)removeDaysAfterFinishDate
-{
-    NSInteger finishDay = [finishDateComponents day];
-    long i=[days count]-1;
-    while (i>=0 && [days[i] integerValue]>finishDay)
-    {
-        [days removeObjectAtIndex:i];
-        i--;
-    }
-
-}
-
 /**
  *  Delete days before the started date
  */
@@ -179,59 +165,6 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     monthPossibilities = [months copy];
 }
 
--(void)initializeMonthsPossibilitiesFrom:(NSDate *)startedDate untilFinishDate:(NSDate*)finishedDate forYears:(NSInteger)year
-{
-    months = [[NSMutableArray alloc] init];
-    NSInteger month =1;
-    NSInteger numberOfMonth = 0;
-    
-    if([startDateComponents year]==year)
-    {
-        numberOfMonth = [[[NSCalendar currentCalendar] components: NSCalendarUnitMonth
-                                                                   fromDate: startedDate
-                                                                     toDate: finishedDate
-                                                                    options: 0] month];
-        numberOfMonth+=1;
-        month =[startDateComponents month];
-        
-    }
-    else{
-        if([startDateComponents year]+1==year)
-        {
-            numberOfMonth = [finishDateComponents month]-1;
-        }
-    }
-    for (long i=0; i<=numberOfMonth && month<=12; i++)
-    {
-        [months addObject:[[dateFormatter monthSymbols]objectAtIndex: month-1]];
-        month++;
-    }
-    
-    
-    monthPossibilities = [months copy];
-}
-
-/**
- * Initialiase the years possibilities in a array
- */
-- (void)initYearsPossibilitiesFrom:(NSDate *)startedDate untilFinishDate:(NSDate*)finishDate
-
-{
-    NSDateComponents * startedDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:startedDate];
-    
-    
-    NSDateComponents *addComponents = [[NSDateComponents alloc] init];
-    dateFormatter.dateFormat = @"yyyy";
-    
-    [years removeAllObjects];
-    
-    for (int nbYears = 0;nbYears+[startedDateComps year] <= [finishDateComponents year];nbYears++)
-    {
-        addComponents.year = nbYears;
-        [years addObject:[dateFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingComponents:addComponents toDate:startedDate options:0]]];
-    }
-}
-
 
 /**
  * Initialiase the years possibilities in a array
@@ -251,38 +184,6 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         [years addObject:[dateFormatter stringFromDate:[calendar dateByAddingComponents:addComponents toDate:self.startDate options:0]]];
     }
 }
-
--(void)initializefromStartedDate:(NSDate *) startedDate toFinishDate:(NSDate *)finish
-{
-    //settings params
-    if(!startedDate)
-    {
-        self.startDate = [NSDate date];
-    }
-    else{
-        self.startDate = startedDate;
-    }
-    finishDate = finish;
-    
-    finishDateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:finishDate];
-    
-    //initialize date format
-    [self initDateFormat];
-    [self setIndex];
-    
-    //init days
-    [self initializeDaysPossibilities];
-    
-    //init months
-    [self initializeMonthsPossibilitiesFrom:self.startDate untilFinishDate:finishDate forYears:[startDateComponents year]];
-    
-    //init years
-    [self initYearsPossibilitiesFrom:self.startDate untilFinishDate:finishDate];
-    
-    //if previous instances of BADatePickerView - reset the component
-    [self reloadAllComponents];
-}
-
 
 -(void)initializeWithNumberOfYears:(NSInteger)numberOfYears startedDate:(NSDate *) startedDate
 {
@@ -454,15 +355,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     else
     {
         monthChanged = YES;
-        
-        if(finishDate)
-        {
-            [self initializeMonthsPossibilitiesFrom:self.startDate untilFinishDate:finishDate forYears:currentYear];
-        }
-        else
-        {
-            months = [NSMutableArray arrayWithArray:monthPossibilities];
-        }
+        months = [NSMutableArray arrayWithArray:monthPossibilities];
     }
     
     if(monthChanged)
@@ -482,7 +375,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
     currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     
-    //if i haven't periodicity
+    
     if(self.periodicity==0)
     {
         dayChanged = YES;
@@ -491,24 +384,13 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         //if selected month is february
         if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
         {
-            if( [startDateComponents day]<26)
+            [days removeLastObject];
+            if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
             {
-                //if we are before teh 26, we deleted previous day and last possibly due date
-                //todo make it generic and remove days after 28 or 29, not only the last choice
-                [days removeLastObject];
-                if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
-                {
-                    [days addObject:[[NSNumber alloc] initWithInt:28]];
-                }
-                else{
-                    [days addObject:[[NSNumber alloc] initWithInt:29]];
-                }
+                [days addObject:[[NSNumber alloc] initWithInt:28]];
             }
-            else
-            {
-                //we go on th next month
-                monthChanged = YES;
-                nextMonth = YES;
+            else{
+                [days addObject:[[NSNumber alloc] initWithInt:29]];
             }
         }
         
@@ -519,15 +401,6 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         {
             dayChanged = YES;
             [self removeDaysBeforeStartedDate];
-        }
-        else
-        {
-            //if I'm in the same month and the same year of the finish date, remove all days after finish date
-            if(currentMonth==[finishDateComponents month] && currentYear==[finishDateComponents year])
-            {
-                dayChanged = YES;
-                [self removeDaysAfterFinishDate];
-            }
         }
         
     }
@@ -622,11 +495,23 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 
 -(void)selectThisDay:(NSInteger)thisDay
 {
+    
+    //februaryCase
+    
+    if(thisDay==28 || thisDay==29)
+    {
+        thisDay=30;
+    }
+    
+    //all case
     BOOL dayFound = NO;
     int i=0;
     while(i< [days count] && [days[i] integerValue] <= thisDay)
     {
-        if([days[i] integerValue] == thisDay)
+        if([days[i] integerValue] == thisDay
+           ||( thisDay==30 &&(
+                              [days[i] integerValue]==28
+                              || [days[i] integerValue]==29)))
         {
             [self selectRow:i inComponent:indexOfDays animated:NO];
             dayFound = YES;
@@ -772,9 +657,9 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     [currentDateComps setDay:day];
     [currentDateComps setMonth:month-1];
     [currentDateComps setYear:year];
-   /* NSDate * currentDate = [[NSCalendar currentCalendar] dateFromComponents:currentDateComps] ;
-    currentDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:currentDate];*/
-
+    /* NSDate * currentDate = [[NSCalendar currentCalendar] dateFromComponents:currentDateComps] ;
+     currentDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:currentDate];*/
+    
     
     
     return [currentDateComps isLeapMonth];
