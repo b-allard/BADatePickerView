@@ -376,24 +376,30 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     
     
+    //if selected month is february
+    if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
+    {
+        [days removeLastObject];
+        if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
+        {
+            [days addObject:[[NSNumber alloc] initWithInt:28]];
+        }
+        else{
+            [days addObject:[[NSNumber alloc] initWithInt:29]];
+        }
+        dayChanged = YES;
+    }
+    else{
+        [days removeLastObject];
+        [days addObject:[[NSNumber alloc] initWithInt:30]];
+    }
+
+    
+    
     if(self.periodicity==0)
     {
         dayChanged = YES;
         days = [NSMutableArray arrayWithArray:dayPossibilities];
-        
-        //if selected month is february
-        if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
-        {
-            [days removeLastObject];
-            if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
-            {
-                [days addObject:[[NSNumber alloc] initWithInt:28]];
-            }
-            else{
-                [days addObject:[[NSNumber alloc] initWithInt:29]];
-            }
-        }
-        
         
         
         //if this month and this year remove previous day
