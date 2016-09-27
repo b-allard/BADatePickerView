@@ -458,7 +458,10 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
                 [self selectRow:i inComponent:indexOfYears animated:NO];
                 yearFound = YES;
             }
-            i++;
+            else
+            {
+                [years removeObjectAtIndex:i];
+            }
         }
         
     }
