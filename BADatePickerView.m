@@ -398,7 +398,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
     
     //if selected month is february
-    if([days count]>0 && [currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
+    if([days count]>0 && [currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] || currentDaySelected>=28 && [days count]>0 )
     {
         [days removeLastObject];
         if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
@@ -411,9 +411,12 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         dayChanged = YES;
     }
     else{
-        [days removeLastObject];
-        [days addObject:[[NSNumber alloc] initWithInt:30]];
-        dayChanged = YES;
+        if([days count] >1 || [days count]>0 && currentDaySelected >= 28)
+        {
+            [days removeLastObject];
+            [days addObject:[[NSNumber alloc] initWithInt:30]];
+            dayChanged = YES;
+        }
     }
 
     
