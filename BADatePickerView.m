@@ -328,13 +328,20 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     BOOL monthChanged = NO;
     BOOL yearChanged = NO;
     BOOL nextMonth = NO;
+    BOOL isThisMonthSelected =NO;
+    NSInteger indexOfMonthSelected = [self selectedRowInComponent:indexOfMonths];
+    NSInteger indexOfYearSelected = [self selectedRowInComponent:indexOfYears];
+    NSInteger indexOfDaySelected = [self selectedRowInComponent:indexOfDays];
     
-    BOOL isThisMonthSelected =[months[[self selectedRowInComponent:indexOfMonths]] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
-    thisYearSelected = [years[[self selectedRowInComponent:indexOfYears]] integerValue]==[startDateComponents year];
+    if(indexOfMonthSelected<[months count])
+    {
+        isThisMonthSelected = [months[indexOfMonthSelected] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
+    }
+    thisYearSelected = [years[indexOfYearSelected] integerValue]==[startDateComponents year];
     
-    NSInteger currentDaySelected = [days[[self selectedRowInComponent:indexOfDays]] integerValue];
-    NSInteger currentYear = [years[[self selectedRowInComponent:indexOfYears]] integerValue];
-    NSString * currentMonthSelectedString = months[[self selectedRowInComponent:indexOfMonths]] ;
+    NSInteger currentDaySelected = [days[indexOfDaySelected] integerValue];
+    NSInteger currentYear = [years[indexOfYearSelected] integerValue];
+    NSString * currentMonthSelectedString = months[indexOfMonthSelected] ;
     NSInteger  currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
     
     //manage day only if no periodicity
