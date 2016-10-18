@@ -251,6 +251,10 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         [self selectNextYear];
         months = [NSMutableArray arrayWithArray:monthPossibilities];
     }
+    
+    [self selectRow:0 inComponent:indexOfDays animated:NO];
+    [self selectRow:0 inComponent:indexOfMonths animated:NO];
+    [self selectRow:0 inComponent:indexOfYears animated:NO];
 }
 
 
@@ -403,26 +407,56 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         dayChanged = YES;
     }
     
-    
-    //if selected month is february
-    if([days count]>0 && [currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]] )
+    if([days count]>0)
     {
-        [days removeLastObject];
-        if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
-        {
-            [days addObject:[[NSNumber alloc] initWithInt:28]];
-        }
-        else{
-            [days addObject:[[NSNumber alloc] initWithInt:29]];
-        }
-        dayChanged = YES;
-    }
-    else{
-        if([days count] >1 || [days count]>0 && currentDaySelected >= 28)
+        //if i haven't a periodicity
+        if(self.periodicity==0)
         {
             [days removeLastObject];
-            [days addObject:[[NSNumber alloc] initWithInt:30]];
+            //if february
+            if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]])
+            {
+                if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
+                {
+                    [days addObject:[[NSNumber alloc] initWithInt:28]];
+                }
+                else
+                {
+                    [days addObject:[[NSNumber alloc] initWithInt:29]];
+                }
+   
+            }
+            else
+            {
+                [days addObject:[[NSNumber alloc] initWithInt:30]];
+            }
             dayChanged = YES;
+        }
+        else
+        {
+            if(currentDaySelected>=28)
+            {
+                [days removeLastObject];
+                //if february
+                if([currentMonthSelectedString isEqualToString:[self getFebruaryMonthString]])
+                {
+                    if(![self dateIsLeapYear:currentYear month:currentMonth day:currentDaySelected])
+                    {
+                        [days addObject:[[NSNumber alloc] initWithInt:28]];
+                    }
+                    else
+                    {
+                        [days addObject:[[NSNumber alloc] initWithInt:29]];
+                    }
+                    
+                }
+                else
+                {
+                    [days addObject:[[NSNumber alloc] initWithInt:30]];
+                }
+                dayChanged = YES;
+
+            }
         }
     }
 
