@@ -407,6 +407,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         dayChanged = YES;
     }
     
+    
     if([days count]>0)
     {
         //if i haven't a periodicity
@@ -708,16 +709,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 
 -(BOOL)dateIsLeapYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day
 {
-    NSDateComponents *currentDateComps = [[NSDateComponents alloc] init];
-    [currentDateComps setDay:day];
-    [currentDateComps setMonth:month-1];
-    [currentDateComps setYear:year];
-    /* NSDate * currentDate = [[NSCalendar currentCalendar] dateFromComponents:currentDateComps] ;
-     currentDateComps = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:currentDate];*/
-    
-    
-    
-    return [currentDateComps isLeapMonth];
+    BOOL leap = (( year%100 != 0) && (year%4 == 0)) || year%400 == 0;
+    return leap;
 }
 
 #pragma mark - setters / getters
