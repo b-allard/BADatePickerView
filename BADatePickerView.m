@@ -107,6 +107,13 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
  */
 - (void)removeOthersDays {
     NSInteger startDateDay = [startDateComponents day];
+    
+    //bugFixing 28 or 29 february as startedDate
+    if((startDateDay==28 || startDateDay==29)&&[startDateComponents month]==2)
+    {
+        startDateDay=30;
+    }
+    
     long i=0;
     while (i<[days count]) {
         if([[days objectAtIndex:i] integerValue]!=startDateDay)
