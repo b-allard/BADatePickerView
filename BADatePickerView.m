@@ -347,13 +347,46 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     if(indexOfMonthSelected<[months count])
     {
         isThisMonthSelected = [months[indexOfMonthSelected] isEqualToString:[dateFormatter monthSymbols][[startDateComponents month]-1]];
+        
     }
+    NSString * currentMonthSelectedString = months[indexOfMonthSelected] ;
+    NSInteger  currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
+    
     thisYearSelected = [years[indexOfYearSelected] integerValue]==[startDateComponents year];
+    
+    //if I haven't possibilities
+    if(![days count])
+    {
+        days = [NSMutableArray arrayWithArray:dayPossibilities];
+        indexOfDaySelected = 0;
+        if(indexOfMonthSelected+1<[months count])
+        {
+            //still in the same year, take next month
+            indexOfMonthSelected+=1;
+            currentMonthSelectedString = months[indexOfMonthSelected] ;
+            currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
+            isThisMonthSelected = false;
+        }
+        else{
+            //not still in the same year, take first month
+            if(indexOfYearSelected+1<[years count])
+            {
+                indexOfYearSelected+=1;
+                thisYearSelected=false;
+                
+                months = [NSMutableArray arrayWithArray:monthPossibilities];
+                indexOfMonthSelected=0;
+                currentMonthSelectedString = months[indexOfMonthSelected] ;
+                currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
+                isThisMonthSelected = false;
+            }
+            
+        }
+    }
     
     NSInteger currentDaySelected = [days[indexOfDaySelected] integerValue];
     NSInteger currentYear = [years[indexOfYearSelected] integerValue];
-    NSString * currentMonthSelectedString = months[indexOfMonthSelected] ;
-    NSInteger  currentMonth = [self getMonthNumberFromMonthString:currentMonthSelectedString];
+    
     
     //manage day only if no periodicity
     
