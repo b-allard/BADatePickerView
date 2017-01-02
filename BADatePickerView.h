@@ -24,12 +24,6 @@
 /**
  *  Initialize picker view
  */
--(void)initializefromStartedDate:(NSDate *) startedDate toFinishDate:(NSDate *)finishDate;
-
-
-/**
- *  Initialize picker view
- */
 -(void)initializeWithNumberOfYears:(NSInteger)numberOfYears startedDate:(NSDate *) startedDate;
 
 /**
