@@ -217,6 +217,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     
     //init years
     [self initYearsPossibilities];
+    
+    [self reloadAllComponents];
 }
 
 -(void)initializeWithPeriodicity:(NSUInteger)periodicity numberOfYears:(NSInteger)numberOfYears startedDate:(NSDate *) startedDate
