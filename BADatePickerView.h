@@ -20,6 +20,7 @@
 @property (nonatomic) NSUInteger periodicity;
 @property (nonatomic) NSDate * startDate;
 @property (nonatomic, assign) id<BADatePickerViewDelegate> baDatePickerViewDelegate;
+@property (nonatomic, strong) NSCalendar *calendar;
 
 /**
  *  Initialize picker view
