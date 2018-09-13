@@ -52,6 +52,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
         self.delegate = self;
         self.dataSource= self;
         
+        _calendar = [NSCalendar currentCalendar];
+        
         // init all NSArray, NSMutableArray, ...
         dateFormatter = [[NSDateFormatter alloc] init];
         
@@ -72,11 +74,19 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     return self;
 }
 
+- (void)setCalendar:(NSCalendar *)calendar
+{
+    _calendar = calendar;
+    dateFormatter.timeZone = calendar.timeZone;
+    dateFormatter.calendar = calendar;
+}
+
 /**
  *  Determine which date format is use on the phone
  */
 - (void)initDateFormat {
     NSDateFormatter* df = [[NSDateFormatter alloc] init];
+    df.timeZone = self.calendar.timeZone;
     [df setDateStyle:NSDateFormatterShortStyle];
     [df setTimeStyle:NSDateFormatterShortStyle];
     
@@ -180,6 +190,8 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 {
     //Adding years from started date to numberOfYearFromNow
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    calendar.locale = self.calendar.locale;
+    calendar.timeZone = self.calendar.timeZone;
     NSDateComponents *addComponents = [[NSDateComponents alloc] init];
     dateFormatter.dateFormat = @"yyyy";
     
@@ -518,7 +530,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     [currentDateComponents setDay:currentDaySelected];
     [currentDateComponents setMonth:currentMonth];
     [currentDateComponents setYear:currentYear];
-    currentDateSelected = [[NSCalendar currentCalendar] dateFromComponents:currentDateComponents];
+    currentDateSelected = [self.calendar dateFromComponents:currentDateComponents];
     
     if ( [[self baDatePickerViewDelegate] respondsToSelector:@selector(pickerView:dateValueChanged:)] ) {
         [[self baDatePickerViewDelegate] pickerView:pickerView dateValueChanged:currentDateSelected];
@@ -689,7 +701,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
  */
 -(void)removeUnrelevantMonthWithPeriodicity
 {
-    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:self.startDate];
+    NSDateComponents *components = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:self.startDate];
     
     if(self.periodicity != 0)
     {
@@ -727,7 +739,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     BOOL monthFound=NO;
     
     //determine current month and compare with
-    NSDateComponents *components = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:self.startDate];
+    NSDateComponents *components = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:self.startDate];
     NSInteger currentMonth = [components month];
     
     int i = 0;
@@ -776,7 +788,7 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
 -(void)setStartDate:(NSDate *)startDate
 {
     _startDate = startDate;
-    startDateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[self startDate]];
+    startDateComponents = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear fromDate:[self startDate]];
 }
 
 -(NSDate* )startDate
