@@ -81,7 +81,13 @@ static NSInteger const NUMBER_OF_COLUMNS = 3;
     [df setTimeStyle:NSDateFormatterShortStyle];
     
     //spare all date elements
-    NSArray * array = [[df dateFormat] componentsSeparatedByString:@"/"];
+    NSArray * array;
+    if ([[df dateFormat] containsString:@"-"]) {
+        array = [[df dateFormat] componentsSeparatedByString:@"-"];
+    }
+    else {
+        array = [[df dateFormat] componentsSeparatedByString:@"/"];
+    }
     if([array count] <=1)
     {
         array = [[df dateFormat] componentsSeparatedByString:@"."];
